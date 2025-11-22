@@ -20,9 +20,12 @@ class MainWindow(ctk.CTk):
         self.title("CRUD SOF108 - Gestión de Empleados")
         self.geometry("1400x800")
         
-        # Tema moderno
+        # Tema azul con negro
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
+        
+        # Configurar colores personalizados
+        self.configure(fg_color="#000000")  # Fondo negro
         
         # Layout principal
         self.grid_columnconfigure(1, weight=1)
@@ -47,7 +50,7 @@ class MainWindow(ctk.CTk):
     def create_main_area(self):
         """Crea el área principal"""
         # Frame principal
-        self.main_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.main_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="#000000")
         self.main_frame.grid(row=0, column=1, sticky="nsew", padx=0, pady=0)
         self.main_frame.grid_rowconfigure(1, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
@@ -56,14 +59,14 @@ class MainWindow(ctk.CTk):
         self.create_topbar()
         
         # Área de contenido (tabla)
-        self.content_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
+        self.content_frame = ctk.CTkFrame(self.main_frame, corner_radius=0, fg_color="#0a0a0a")
         self.content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
         self.content_frame.grid_rowconfigure(0, weight=1)
         self.content_frame.grid_columnconfigure(0, weight=1)
     
     def create_topbar(self):
         """Crea la barra superior con título y botones"""
-        topbar = ctk.CTkFrame(self.main_frame, height=80, corner_radius=0)
+        topbar = ctk.CTkFrame(self.main_frame, height=80, corner_radius=0, fg_color="#0a0a0a")
         topbar.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 0))
         topbar.grid_columnconfigure(0, weight=1)
         

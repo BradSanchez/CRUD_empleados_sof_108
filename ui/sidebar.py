@@ -5,7 +5,7 @@ class Sidebar(ctk.CTkFrame):
     """Barra lateral de navegación"""
     
     def __init__(self, parent, on_table_select, on_config):
-        super().__init__(parent, width=250, corner_radius=0)
+        super().__init__(parent, width=250, corner_radius=0, fg_color="#0a0a0a")  # Negro más claro para sidebar
         
         self.on_table_select = on_table_select
         self.on_config = on_config
