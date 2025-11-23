@@ -34,13 +34,13 @@ class Sidebar(ctk.CTkFrame):
                     text_color="gray").pack(anchor="w", padx=15, pady=(10, 5))
         
         tables = [
-            ("regiones", "Regiones"),
-            ("paises", "Países"),
-            ("locaciones", "Locaciones"),
+            ("empleados", "Empleados"),
             ("departamentos", "Departamentos"),
             ("puestos", "Puestos"),
-            ("empleados", "Empleados"),
-            ("historico", "Histórico")
+            ("historico", "Histórico"),
+            ("locaciones", "Locaciones"),
+            ("paises", "Países"),
+            ("regiones", "Regiones")
         ]
         
         for table_id, table_name in tables:

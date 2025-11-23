@@ -171,10 +171,10 @@ class LocacionForm(BaseForm):
         paises = crud_ops.get_paises_list()
         pais_options = [f"{p[0]} - {p[1]}" for p in paises]
         
-        self.add_field("Dirección", "direccion", placeholder_text="Ej: Calle Principal 123")
-        self.add_field("Código Postal", "codigo_postal", placeholder_text="Ej: 12345")
+        self.add_field("Dirección", "direccion", placeholder_text="Ej: Calle Principal 123", required=False)
+        self.add_field("Código Postal", "codigo_postal", placeholder_text="Ej: 12345", required=False)
         self.add_field("Ciudad", "ciudad", placeholder_text="Ej: Madrid")
-        self.add_field("Provincia/Estado", "provincia", placeholder_text="Ej: Madrid")
+        self.add_field("Provincia/Estado", "provincia", placeholder_text="Ej: Madrid", required=False)
         self.add_field("País", "pais", field_type="combobox", options=pais_options)
         self.add_buttons(self.save)
         
@@ -192,8 +192,8 @@ class LocacionForm(BaseForm):
         provincia = self.get_value("provincia").strip()
         pais_str = self.get_value("pais")
         
-        if not all([direccion, ciudad, pais_str]):
-            messagebox.showerror("Error", "Dirección, ciudad y país son obligatorios")
+        if not all([ciudad, pais_str]):
+            messagebox.showerror("Error", "Ciudad y país son obligatorios")
             return
         
         id_pais = pais_str.split(" - ")[0]
@@ -337,7 +337,7 @@ class EmpleadoForm(BaseForm):
         departamentos = crud_ops.get_departamentos_list()
         depto_options = [""] + [f"{d[0]} - {d[1]}" for d in departamentos]
         
-        self.add_field("Nombre", "nombre", placeholder_text="Ej: Juan")
+        self.add_field("Nombre", "nombre", placeholder_text="Ej: Juan", required=False)
         self.add_field("Apellido", "apellido", placeholder_text="Ej: Pérez")
         self.add_field("Email", "email", placeholder_text="Ej: juan.perez@empresa.com")
         self.add_field("Teléfono", "telefono", placeholder_text="Ej: +34 123 456 789", required=False)
@@ -377,13 +377,13 @@ class EmpleadoForm(BaseForm):
         supervisor_str = self.get_value("supervisor")
         departamento_str = self.get_value("departamento")
         
-        if not all([nombre, apellido, email, fecha_contrato, puesto_str, salario]):
+        if not all([apellido, email, fecha_contrato, puesto_str, salario]):
             messagebox.showerror("Error", "Los campos marcados con * son obligatorios")
             return
         
         try:
-            salario = int(salario)
-            comision = int(comision) if comision else None
+            salario = float(salario)
+            comision = float(comision) if comision else None
         except ValueError:
             messagebox.showerror("Error", "Salario y comisión deben ser números")
             return

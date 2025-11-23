@@ -161,14 +161,11 @@ class CRUDOperations:
     
     def add_empleado(self, nombre, apellido, email, telefono, fecha_contrato, 
                      id_puesto, salario, comision, id_supervisor, id_departamento):
-        # Obtener el siguiente ID
         query_max = "SELECT ISNULL(MAX(ID_EMPLEADO), 0) + 1 FROM EMPLEADOS"
         success, cols, result = self.db.execute_query(query_max)
         if not success:
             return False, "Error al obtener ID"
-        
         nuevo_id = result[0][0]
-        
         query = """
         INSERT INTO EMPLEADOS 
         (ID_EMPLEADO, NOMBRE, APELLIDO, EMAIL, NUMERO_TELEFONO, FECHA_CONTRATO, ID_PUESTO, 

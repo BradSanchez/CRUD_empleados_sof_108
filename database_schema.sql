@@ -1,193 +1,209 @@
--- =============================================
--- Script de Creación de Base de Datos SOF108
--- Sistema de Gestión de Empleados
--- =============================================
+USE master;
+GO
 
--- Crear base de datos (si no existe)
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'SOF108')
+-- 1. Limpieza preventiva
+IF EXISTS (SELECT * FROM sys.databases WHERE name = 'SOF108')
 BEGIN
-    CREATE DATABASE SOF108;
-END
+    ALTER DATABASE SOF108 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE SOF108;
+END;
+GO
+
+CREATE DATABASE SOF108;
 GO
 
 USE SOF108;
 GO
 
--- =============================================
--- Tabla: REGIONES
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'REGIONES')
-BEGIN
-    CREATE TABLE REGIONES (
-        ID_REGION INT PRIMARY KEY IDENTITY(1,1),
-        NOMBRE_REGION VARCHAR(25) NOT NULL
-    );
-END
+PRINT '>>> Creando Tablas...';
+
+CREATE TABLE REGIONES (
+    ID_REGION INT PRIMARY KEY,
+    NOMBRE_REGION NVARCHAR(25) NOT NULL
+);
+
+CREATE TABLE PAISES (
+    ID_PAIS CHAR(2) PRIMARY KEY,
+    NOMBRE_PAIS NVARCHAR(40) NOT NULL,
+    ID_REGION INT NOT NULL
+);
+
+CREATE TABLE LOCACIONES (
+    ID_LOCACION INT PRIMARY KEY,
+    DIRECCION NVARCHAR(40),
+    CODIGO_POSTAL NVARCHAR(12),
+    CIUDAD NVARCHAR(30) NOT NULL,
+    PROVINCIA NVARCHAR(25),
+    ID_PAIS CHAR(2) NOT NULL
+);
+
+CREATE TABLE PUESTOS (
+    ID_PUESTO NVARCHAR(10) PRIMARY KEY,
+    TITULO_PUESTO NVARCHAR(35) NOT NULL,
+    SALARIO_MINIMO INT,
+    SALARIO_MAXIMO INT
+);
+
+CREATE TABLE DEPARTAMENTOS (
+    ID_DEPARTAMENTO INT PRIMARY KEY,
+    NOMBRE_DEPARTAMENTO NVARCHAR(30) NOT NULL,
+    ID_SUPERVISOR INT,
+    ID_LOCACION INT
+);
+
+CREATE TABLE EMPLEADOS (
+    ID_EMPLEADO INT PRIMARY KEY,
+    NOMBRE NVARCHAR(20),
+    APELLIDO NVARCHAR(25) NOT NULL,
+    EMAIL VARCHAR(25) NOT NULL UNIQUE,
+    NUMERO_TELEFONO VARCHAR(20),
+    FECHA_CONTRATO DATE NOT NULL,
+    ID_PUESTO NVARCHAR(10) NOT NULL,
+    SALARIO DECIMAL(10, 2),
+    COMISION DECIMAL(5, 2),
+    ID_SUPERVISOR INT,
+    ID_DEPARTAMENTO INT
+);
+
+CREATE TABLE HISTORICO (
+    ID_EMPLEADO INT NOT NULL,
+    FECHA_INICIO DATE NOT NULL,
+    FECHA_FIN DATE NOT NULL,
+    ID_PUESTO NVARCHAR(10) NOT NULL,
+    ID_DEPARTAMENTO INT NOT NULL,
+    PRIMARY KEY (ID_EMPLEADO, FECHA_INICIO)
+);
 GO
 
--- =============================================
--- Tabla: PAISES
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'PAISES')
-BEGIN
-    CREATE TABLE PAISES (
-        ID_PAIS VARCHAR(2) PRIMARY KEY,
-        NOMBRE_PAIS VARCHAR(40) NOT NULL,
-        ID_REGION INT,
-        FOREIGN KEY (ID_REGION) REFERENCES REGIONES(ID_REGION)
-    );
-END
-GO
+PRINT '>>> Insertando Datos Maestros...';
 
--- =============================================
--- Tabla: LOCACIONES
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'LOCACIONES')
-BEGIN
-    CREATE TABLE LOCACIONES (
-        ID_LOCACION INT PRIMARY KEY IDENTITY(1,1),
-        DIRECCION VARCHAR(40),
-        CODIGO_POSTAL VARCHAR(12),
-        CIUDAD VARCHAR(30) NOT NULL,
-        PROVINCIA VARCHAR(25),
-        ID_PAIS VARCHAR(2),
-        FOREIGN KEY (ID_PAIS) REFERENCES PAISES(ID_PAIS)
-    );
-END
-GO
+INSERT INTO REGIONES (ID_REGION, NOMBRE_REGION) VALUES
+(1, 'Europe'), (2, 'Americas'), (3, 'Asia'), (4, 'Middle East and Africa');
 
--- =============================================
--- Tabla: DEPARTAMENTOS
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'DEPARTAMENTOS')
-BEGIN
-    CREATE TABLE DEPARTAMENTOS (
-        ID_DEPARTAMENTO INT PRIMARY KEY IDENTITY(1,1),
-        NOMBRE_DEPARTAMENTO VARCHAR(30) NOT NULL,
-        ID_SUPERVISOR INT,
-        ID_LOCACION INT,
-        FOREIGN KEY (ID_LOCACION) REFERENCES LOCACIONES(ID_LOCACION)
-    );
-END
-GO
+INSERT INTO PAISES (ID_PAIS, NOMBRE_PAIS, ID_REGION) VALUES
+('AR', 'Argentina', 2), ('AU', 'Australia', 3), ('BE', 'Belgium', 1), ('BR', 'Brazil', 2),
+('CA', 'Canada', 2), ('CH', 'Switzerland', 1), ('CN', 'China', 3), ('DE', 'Germany', 1),
+('DK', 'Denmark', 1), ('EG', 'Egypt', 4), ('FR', 'France', 1), ('HK', 'HongKong', 3),
+('IL', 'Israel', 4), ('IN', 'India', 3), ('IT', 'Italy', 1), ('JP', 'Japan', 3),
+('KW', 'Kuwait', 4), ('MX', 'Mexico', 2), ('NG', 'Nigeria', 4), ('NL', 'Netherlands', 1),
+('SG', 'Singapore', 3), ('UK', 'United Kingdom', 1), ('US', 'United States of America', 2),
+('ZM', 'Zambia', 4), ('ZW', 'Zimbabwe', 4);
 
--- =============================================
--- Tabla: PUESTOS
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'PUESTOS')
-BEGIN
-    CREATE TABLE PUESTOS (
-        ID_PUESTO VARCHAR(10) PRIMARY KEY,
-        TITULO_PUESTO VARCHAR(35) NOT NULL,
-        SALARIO_MINIMO INT,
-        SALARIO_MAXIMO INT
-    );
-END
-GO
+INSERT INTO LOCACIONES (ID_LOCACION, DIRECCION, CODIGO_POSTAL, CIUDAD, PROVINCIA, ID_PAIS) VALUES
+(1000, '1297 Via Cola di Rie', '00989', 'Roma', NULL, 'IT'),
+(1100, '93091 Calle della Testa', '10934', 'Venice', NULL, 'IT'),
+(1200, '2017 Shinjuku-ku', '1689', 'Tokyo', 'Tokyo Prefecture', 'JP'),
+(1400, '2014 Jabberwocky Rd', '26192', 'Southlake', 'Texas', 'US'),
+(1500, '2011 Interiors Blvd', '99236', 'South San Francisco', 'California', 'US'),
+(1700, '2004 Charade Rd', '98199', 'Seattle', 'Washington', 'US'),
+(1800, '147 Spadina Ave', 'M5V 2L7', 'Toronto', 'Ontario', 'CA'),
+(2400, '8204 Arthur St', NULL, 'London', NULL, 'UK'),
+(2500, 'Magdalen Centre', 'OX9 9ZB', 'Oxford', 'Oxford', 'UK'),
+(2700, 'Schwanthalerstr. 7031', '80925', 'Munich', 'Bavaria', 'DE');
 
--- =============================================
--- Tabla: EMPLEADOS
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EMPLEADOS')
-BEGIN
-    CREATE TABLE EMPLEADOS (
-        ID_EMPLEADO INT PRIMARY KEY IDENTITY(1,1),
-        NOMBRE VARCHAR(20) NOT NULL,
-        APELLIDO VARCHAR(25) NOT NULL,
-        EMAIL VARCHAR(25) NOT NULL,
-        NUMERO_TELEFONO VARCHAR(20),
-        FECHA_CONTRATO DATETIME NOT NULL,
-        ID_PUESTO VARCHAR(10),
-        SALARIO INT,
-        COMISION INT,
-        ID_SUPERVISOR INT,
-        ID_DEPARTAMENTO INT,
-        FOREIGN KEY (ID_PUESTO) REFERENCES PUESTOS(ID_PUESTO),
-        FOREIGN KEY (ID_DEPARTAMENTO) REFERENCES DEPARTAMENTOS(ID_DEPARTAMENTO)
-    );
-END
-GO
+INSERT INTO PUESTOS (ID_PUESTO, TITULO_PUESTO, SALARIO_MINIMO, SALARIO_MAXIMO) VALUES
+('AD_PRES', 'President', 20000, 40000),
+('AD_VP', 'Administration Vice President', 15000, 30000),
+('AD_ASST', 'Administration Assistant', 3000, 6000),
+('FI_MGR', 'Finance Manager', 8200, 16000),
+('FI_ACCOUNT', 'Accountant', 4200, 9000),
+('AC_MGR', 'Accounting Manager', 8200, 16000),
+('AC_ACCOUNT', 'Public Accountant', 4200, 9000),
+('SA_MAN', 'Sales Manager', 10000, 20000),
+('SA_REP', 'Sales Representative', 6000, 12000),
+('PU_MAN', 'Purchasing Manager', 8000, 15000),
+('PU_CLERK', 'Purchasing Clerk', 2500, 5500),
+('ST_MAN', 'Stock Manager', 5500, 8500),
+('ST_CLERK', 'Stock Clerk', 2000, 5000),
+('SH_CLERK', 'Shipping Clerk', 2500, 5500),
+('IT_PROG', 'Programmer', 4000, 10000),
+('MK_MAN', 'Marketing Manager', 9000, 15000),
+('MK_REP', 'Marketing Representative', 4000, 9000),
+('HR_REP', 'Human Resources Representative', 4000, 9000),
+('PR_REP', 'Public Relations Representative', 4500, 10500);
 
--- =============================================
--- Tabla: HISTORICO
--- =============================================
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'HISTORICO')
-BEGIN
-    CREATE TABLE HISTORICO (
-        ID_EMPLEADO INT,
-        FECHA_INICIO DATETIME NOT NULL,
-        FECHA_FIN DATETIME NOT NULL,
-        ID_PUESTO VARCHAR(10),
-        ID_DEPARTAMENTO INT,
-        PRIMARY KEY (ID_EMPLEADO, FECHA_INICIO),
-        FOREIGN KEY (ID_EMPLEADO) REFERENCES EMPLEADOS(ID_EMPLEADO),
-        FOREIGN KEY (ID_PUESTO) REFERENCES PUESTOS(ID_PUESTO),
-        FOREIGN KEY (ID_DEPARTAMENTO) REFERENCES DEPARTAMENTOS(ID_DEPARTAMENTO)
-    );
-END
-GO
+PRINT '>>> Insertando Datos Transaccionales...';
 
--- =============================================
--- Datos de Ejemplo (Opcional)
--- =============================================
+INSERT INTO DEPARTAMENTOS (ID_DEPARTAMENTO, NOMBRE_DEPARTAMENTO, ID_LOCACION, ID_SUPERVISOR) VALUES
+(10, 'Administration', 1700, NULL),
+(20, 'Marketing', 1800, NULL),
+(30, 'Purchasing', 1700, NULL),
+(40, 'Human Resources', 2400, NULL),
+(50, 'Shipping', 1500, NULL),
+(60, 'IT', 1400, NULL),
+(70, 'Public Relations', 2700, NULL),
+(80, 'Sales', 2500, NULL),
+(90, 'Executive', 1700, NULL),
+(100, 'Finance', 1700, NULL),
+(110, 'Accounting', 1700, NULL);
 
--- Insertar regiones de ejemplo
-IF NOT EXISTS (SELECT * FROM REGIONES)
-BEGIN
-    INSERT INTO REGIONES (NOMBRE_REGION) VALUES 
-        ('Europa'),
-        ('América'),
-        ('Asia'),
-        ('África');
-END
-GO
+SET DATEFORMAT mdy;
 
--- Insertar países de ejemplo
-IF NOT EXISTS (SELECT * FROM PAISES)
-BEGIN
-    INSERT INTO PAISES (ID_PAIS, NOMBRE_PAIS, ID_REGION) VALUES 
-        ('ES', 'España', 1),
-        ('US', 'Estados Unidos', 2),
-        ('MX', 'México', 2),
-        ('AR', 'Argentina', 2),
-        ('JP', 'Japón', 3);
-END
-GO
+INSERT INTO EMPLEADOS (ID_EMPLEADO, NOMBRE, APELLIDO, EMAIL, NUMERO_TELEFONO, FECHA_CONTRATO, ID_PUESTO, SALARIO, ID_SUPERVISOR, ID_DEPARTAMENTO) VALUES
+(100, 'Steven', 'King', 'SKING', '515.123.4567', '06/17/1987', 'AD_PRES', 24000, NULL, 90),
+(101, 'Neena', 'Kochhar', 'NKOCHHAR', '515.123.4568', '09/21/1989', 'AD_VP', 17000, 100, 90),
+(102, 'Lex', 'De Haan', 'LDEHAAN', '515.123.4569', '01/13/1993', 'AD_VP', 17000, 100, 90),
+(103, 'Alexander', 'Hunold', 'AHUNOLD', '590.423.4567', '01/03/1990', 'IT_PROG', 9000, 102, 60),
+(104, 'Bruce', 'Ernst', 'BERNST', '590.423.4568', '05/21/1991', 'IT_PROG', 6000, 103, 60),
+(108, 'Nancy', 'Greenberg', 'NGREENBE', '515.124.4569', '08/17/1994', 'FI_MGR', 12000, 101, 100),
+(114, 'Den', 'Raphaely', 'DRAPHEAL', '515.127.4561', '12/07/1994', 'PU_MAN', 11000, 100, 30),
+(120, 'Matthew', 'Weiss', 'MWEISS', '650.123.1234', '07/18/1996', 'ST_MAN', 8000, 100, 50),
+(121, 'Adam', 'Fripp', 'AFRIPP', '650.123.2234', '04/10/1997', 'ST_MAN', 8200, 100, 50),
+(145, 'John', 'Russell', 'JRUSSEL', '011.44.1344.429268', '10/01/1996', 'SA_MAN', 14000, 100, 80),
+(200, 'Jennifer', 'Whalen', 'JWHALEN', '515.123.4444', '09/17/1987', 'AD_ASST', 4400, 101, 10),
+(201, 'Michael', 'Hartstein', 'MHARTSTE', '515.123.5555', '02/17/1996', 'MK_MAN', 13000, 100, 20),
+(203, 'Susan', 'Mavris', 'SMAVRIS', '515.123.7777', '06/07/1994', 'HR_REP', 6500, 101, 40),
+(204, 'Hermann', 'Baer', 'HBAER', '515.123.8888', '06/07/1994', 'PR_REP', 10000, 101, 70),
+(205, 'Shelley', 'Higgins', 'SHIGGINS', '515.123.8080', '06/07/1994', 'AC_MGR', 12000, 101, 110);
 
--- Insertar locaciones de ejemplo
-IF NOT EXISTS (SELECT * FROM LOCACIONES)
-BEGIN
-    INSERT INTO LOCACIONES (DIRECCION, CODIGO_POSTAL, CIUDAD, PROVINCIA, ID_PAIS) VALUES 
-        ('Calle Mayor 1', '28001', 'Madrid', 'Madrid', 'ES'),
-        ('5th Avenue 100', '10001', 'New York', 'New York', 'US'),
-        ('Reforma 500', '06600', 'Ciudad de México', 'CDMX', 'MX');
-END
-GO
+INSERT INTO HISTORICO (ID_EMPLEADO, FECHA_INICIO, FECHA_FIN, ID_PUESTO, ID_DEPARTAMENTO) VALUES
+(102, '01/13/1993', '07/24/1998', 'IT_PROG', 60),
+(101, '09/21/1989', '10/27/1993', 'AC_ACCOUNT', 110),
+(200, '09/17/1987', '06/17/1993', 'AD_ASST', 90);
 
--- Insertar puestos de ejemplo
-IF NOT EXISTS (SELECT * FROM PUESTOS)
-BEGIN
-    INSERT INTO PUESTOS (ID_PUESTO, TITULO_PUESTO, SALARIO_MINIMO, SALARIO_MAXIMO) VALUES 
-        ('IT_PROG', 'Programador', 30000, 60000),
-        ('IT_MGR', 'Gerente de TI', 60000, 100000),
-        ('HR_REP', 'Representante de RRHH', 25000, 45000),
-        ('SALES', 'Vendedor', 20000, 50000),
-        ('ADMIN', 'Administrativo', 18000, 35000);
-END
-GO
+PRINT '>>> Aplicando Integridad Referencial...';
 
--- Insertar departamentos de ejemplo
-IF NOT EXISTS (SELECT * FROM DEPARTAMENTOS)
-BEGIN
-    INSERT INTO DEPARTAMENTOS (NOMBRE_DEPARTAMENTO, ID_SUPERVISOR, ID_LOCACION) VALUES 
-        ('Tecnología', NULL, 1),
-        ('Recursos Humanos', NULL, 1),
-        ('Ventas', NULL, 2),
-        ('Administración', NULL, 1);
-END
-GO
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 200 WHERE ID_DEPARTAMENTO = 10;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 201 WHERE ID_DEPARTAMENTO = 20;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 114 WHERE ID_DEPARTAMENTO = 30;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 203 WHERE ID_DEPARTAMENTO = 40;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 121 WHERE ID_DEPARTAMENTO = 50;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 103 WHERE ID_DEPARTAMENTO = 60;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 204 WHERE ID_DEPARTAMENTO = 70;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 145 WHERE ID_DEPARTAMENTO = 80;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 100 WHERE ID_DEPARTAMENTO = 90;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 108 WHERE ID_DEPARTAMENTO = 100;
+UPDATE DEPARTAMENTOS SET ID_SUPERVISOR = 205 WHERE ID_DEPARTAMENTO = 110;
 
-PRINT '✅ Base de datos SOF108 creada exitosamente';
-PRINT '✅ Todas las tablas han sido creadas';
-PRINT '✅ Datos de ejemplo insertados';
+ALTER TABLE PAISES ADD CONSTRAINT FK_PAISES_REGIONES 
+FOREIGN KEY (ID_REGION) REFERENCES REGIONES(ID_REGION);
+
+ALTER TABLE LOCACIONES ADD CONSTRAINT FK_LOCACIONES_PAISES 
+FOREIGN KEY (ID_PAIS) REFERENCES PAISES(ID_PAIS);
+
+ALTER TABLE DEPARTAMENTOS ADD CONSTRAINT FK_DEPT_LOCACIONES 
+FOREIGN KEY (ID_LOCACION) REFERENCES LOCACIONES(ID_LOCACION);
+
+ALTER TABLE DEPARTAMENTOS ADD CONSTRAINT FK_DEPT_MANAGER 
+FOREIGN KEY (ID_SUPERVISOR) REFERENCES EMPLEADOS(ID_EMPLEADO);
+
+ALTER TABLE EMPLEADOS ADD CONSTRAINT FK_EMP_PUESTO 
+FOREIGN KEY (ID_PUESTO) REFERENCES PUESTOS(ID_PUESTO);
+
+ALTER TABLE EMPLEADOS ADD CONSTRAINT FK_EMP_DEPT 
+FOREIGN KEY (ID_DEPARTAMENTO) REFERENCES DEPARTAMENTOS(ID_DEPARTAMENTO);
+
+ALTER TABLE EMPLEADOS ADD CONSTRAINT FK_EMP_MANAGER 
+FOREIGN KEY (ID_SUPERVISOR) REFERENCES EMPLEADOS(ID_EMPLEADO);
+
+ALTER TABLE HISTORICO ADD CONSTRAINT FK_HIST_EMP 
+FOREIGN KEY (ID_EMPLEADO) REFERENCES EMPLEADOS(ID_EMPLEADO);
+
+ALTER TABLE HISTORICO ADD CONSTRAINT FK_HIST_PUESTO 
+FOREIGN KEY (ID_PUESTO) REFERENCES PUESTOS(ID_PUESTO);
+
+ALTER TABLE HISTORICO ADD CONSTRAINT FK_HIST_DEPT 
+FOREIGN KEY (ID_DEPARTAMENTO) REFERENCES DEPARTAMENTOS(ID_DEPARTAMENTO);
+
+PRINT '✅ Base de datos SOF108 creada con éxito y optimizada.';
 GO
