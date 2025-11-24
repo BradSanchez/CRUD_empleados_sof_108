@@ -1,6 +1,6 @@
 """
 CRUD SOF108 - Sistema de Gestión de Empleados
-Aplicación con interfaz gráfica moderna para gestionar base de datos SQL Server
+
 """
 
 import customtkinter as ctk
