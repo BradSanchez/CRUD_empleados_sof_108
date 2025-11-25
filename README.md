@@ -340,15 +340,9 @@ Para problemas o preguntas:
 
 Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
-## 🙏 Agradecimientos
-
-- **CustomTkinter** por la librería de UI moderna
-- **pyodbc** por la conexión a SQL Server
-- Comunidad de Python por las excelentes herramientas
-
 ---
 
-**Desarrollado con ❤️ usando Python y CustomTkinter**
+**Desarrollado usando Python y CustomTkinter**
 
 **Versión**: 1.0.0  
-**Última actualización**: 2024
+**Última actualización**: 2025
