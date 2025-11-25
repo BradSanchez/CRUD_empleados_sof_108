@@ -25,10 +25,7 @@ def main():
         root = ctk.CTk()
         root.withdraw()  # Ocultar ventana principal
         
-        def on_config_success():
-            root.quit()
-        
-        config_dialog = ConfigDialog(root, db_connection, on_config_success)
+        ConfigDialog(root, db_connection, lambda: root.quit())
         root.mainloop()
         
         # Si no se configuró, salir
@@ -45,10 +42,7 @@ def main():
                            f"No se pudo conectar a la base de datos:\n\n{message}\n\n"
                            "Verifique la configuración y vuelva a intentar.")
         
-        def on_config_success():
-            root.quit()
-        
-        config_dialog = ConfigDialog(root, db_connection, on_config_success)
+        ConfigDialog(root, db_connection, lambda: root.quit())
         root.mainloop()
         
         # Intentar conectar nuevamente
